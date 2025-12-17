@@ -36,12 +36,40 @@ public class TaskRepository {
     }
 
     public void delete(Task task) {
-// TODO: follow the script
+        EntityManager em = null;
+        try {
+            em = emf.createEntityManager();
+            em.getTransaction().begin();
+            
+            Task managed = em.find(Task.class, task.getId());
+            
+            if (managed != null) {
+                em.remove(managed);
+            }
+            
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            if (em != null && em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            throw new RuntimeException("Error deleting task", e);
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
     }
 
     public List<Task> findAll() {
-// TODO: follow the script
-        EntityManager em = emf.createEntityManager();
-        return null;
+        EntityManager em = null;
+        try {
+            em = emf.createEntityManager();
+            TypedQuery<Task> query = em.createQuery("SELECT t FROM Task t ORDER BY t.id", Task.class);
+            return query.getResultList();
+        } finally {
+            if (em != null) {
+                em.close();
+            }
+        }
     }
 }
