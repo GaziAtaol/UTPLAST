@@ -1,12 +1,24 @@
 package logic;
 
 import jakarta.persistence.*;
+import java.util.Objects;
 
+@Entity
+@Table(name = "tasks")
 public class Task {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @Column(name = "task_name", nullable = false, length = 100)
     private String taskName;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "priority", nullable = false, length = 20)
     private Priority priority;
+    
+    @Column(name = "description", length = 500)
     private String description;
     
     public enum Priority {
@@ -36,6 +48,13 @@ public class Task {
     }
     
     public Task(String taskName, Priority priority, String description) {
+        this.taskName = taskName;
+        this.priority = priority;
+        this.description = description;
+    }
+    
+    public Task(Long id, String taskName, Priority priority, String description) {
+        this.id = id;
         this.taskName = taskName;
         this.priority = priority;
         this.description = description;
@@ -84,5 +103,27 @@ public class Task {
                 ", priority=" + priority +
                 ", description='" + description + '\'' +
                 '}';
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return Objects.equals(id, task.id) &&
+                Objects.equals(taskName, task.taskName) &&
+                priority == task.priority &&
+                Objects.equals(description, task.description);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, taskName, priority, description);
+    }
+    
+    public static void main(String[] args) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("pjUniTest");
+        System.out.println("EntityManagerFactory created successfully!");
+        emf.close();
     }
 }
